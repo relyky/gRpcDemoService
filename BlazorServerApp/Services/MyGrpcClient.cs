@@ -12,6 +12,8 @@ internal class MyGrpcClient
       using var channel = GrpcChannel.ForAddress("https://localhost:7176"); // http://localhost:5220, 
       var client = new Sample.SampleClient(channel);
       var reply = await client.GetFullNameAsync(req);
+
+      await channel.ShutdownAsync();
       return reply;
     }
     catch(Exception ex) 
