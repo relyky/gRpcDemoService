@@ -1,4 +1,6 @@
-﻿@page "/counter"
+﻿@using GrpcDemoService
+@page "/counter"
+@inject MyGrpcClient client
 
 <PageTitle>Counter</PageTitle>
 
@@ -6,13 +8,24 @@
 
 <p role="status">Current count: @currentCount</p>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<button class="btn btn-primary" @onclick=IncrementCount>Click me</button>
+
+<button class="btn btn-primary" @onclick=HandleGetFullName>GetFullName</button>
+<pre>全名: @fullName</pre>
 
 @code {
-    private int currentCount = 0;
+  int currentCount = 0;
+  string fullName = string.Empty;
 
-    private void IncrementCount()
-    {
-        currentCount++;
-    }
+  void IncrementCount()
+  {
+    currentCount++;
+  }
+
+  async Task HandleGetFullName()
+  {
+    var reply  = await client.GetFullNameAsync(new SampleRequest { FirstName = "John", LastName = "Big" });
+    fullName = reply.FullName;
+  }
+
 }
