@@ -9,6 +9,7 @@
 <button class="btn btn-primary" disabled=@f_loading @onclick=HandleReset>Reset</button>
 <button class="btn btn-primary" disabled=@f_loading @onclick=HandleServerStreamDemo>Server stream</button>
 <button class="btn btn-primary" disabled=@f_loading @onclick=HandleClientStreamDemo>Client stream</button>
+<button class="btn btn-primary" disabled=@f_loading @onclick=HandleBidirectionStreamDemo>Bidirectional stream</button>
 
 <h6>回應訊息</h6>
 <ol>
@@ -36,7 +37,6 @@
     try
     {
       f_loading = true;
-
 
       using var channel = GrpcChannel.ForAddress(gRPCHostAddress);
       var client = new StreamDemo.StreamDemoClient(channel);
@@ -84,6 +84,56 @@
 
       var reply = await streamCaller.ResponseAsync;
       messageList.Add($"收到回應: {reply.Message}");
+    }
+    finally
+    {
+      f_loading = false;
+    }
+  }
+
+  async Task HandleBidirectionStreamDemo()
+  {
+    try
+    {
+      f_loading = true;
+      Random randomDelay = new();
+
+      using var channel = GrpcChannel.ForAddress(gRPCHostAddress);
+      var client = new StreamDemo.StreamDemoClient(channel);
+      var streamCaller = client.BidirectionStreamDemo();
+
+      //## 先定義：負責收回回應資料片段工作
+      var replyTask = Task.Run(async () =>
+      {
+        while (await streamCaller.ResponseStream.MoveNext(CancellationToken.None))
+        {
+          var replyMsg = streamCaller.ResponseStream.Current;
+          messageList.Add($"收到訊息: {replyMsg.Message}");
+          await InvokeAsync(StateHasChanged);
+        }
+
+        messageList.Add($"Server Streaming Completed.");
+      });
+
+      //## 再定義：負責上傳資料片段工作
+      var reqTask = Task.Run(async () =>
+      {
+        for (int i = 1; i <= 10; i++)
+        {
+          await Task.Delay(randomDelay.Next(1, 2000)); // 稍等一下
+
+          var reqMsg = new Test { Message = $"Message {i}" };
+          await streamCaller.RequestStream.WriteAsync(reqMsg);
+
+          messageList.Add($"送出訊息: {reqMsg.Message}");
+          await InvokeAsync(StateHasChanged);
+        }
+
+        await streamCaller.RequestStream.CompleteAsync(); // 必需通加已上傳完畢。
+        messageList.Add($"Cimpleted Client Streaming.");
+      });
+
+      await Task.WhenAll(reqTask, replyTask);
     }
     finally
     {
