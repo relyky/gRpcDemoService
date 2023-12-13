@@ -1,0 +1,78 @@
+﻿@using GrpcDemoService
+@page "/grpcdemo"
+@inject MyGrpcClient client
+
+<PageTitle>gRPC demo</PageTitle>
+
+<h3>gRPC demo</h3>
+
+<button class="btn btn-primary" @onclick=HandleHello>Hello</button>
+<button class="btn btn-primary" @onclick=HandleGetFullName>Get fullname</button>
+<button class="btn btn-primary" @onclick=HandleSaveProduct>Save product</button>
+
+@if (f_loading)
+{
+  <div class="progress">
+    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+  </div>
+}
+
+@if (errMsg != null)
+{
+  <div class="alert alert-danger" role="alert">
+    @errMsg
+  </div>
+}
+
+<pre>訊息: @helloReply?.Message</pre>
+<pre>全名: @reply?.FullName</pre>
+<pre>SaveReply: @($"{saveReply?.IsSuccessful} | {saveReply?.StatusCode}")  </pre>
+
+@code {
+  HelloReply? helloReply = null;
+  ProductSaveReply? saveReply = null;
+
+  bool f_loading = false;
+  string? errMsg = null;
+  SampleReply? reply = null;
+
+  async Task HandleHello()
+  {
+    helloReply = await client.HelloAsync(new HelloRequest { Name = $"郝聰明 at {DateTime.Now:HH:mm:ss}" });
+  }
+
+  async Task HandleGetFullName()
+  {
+    try
+    {
+      f_loading = true;
+
+      (reply, string msg) = await client.GetFullNameAsync(new SampleRequest { FirstName = "John", LastName = "Big" });
+
+      // 邏輯錯誤
+      //(reply, string msg) = await client.GetFullNameAsync(new SampleRequest { FirstName = "logical", LastName = "error" });
+
+      // 例外處理
+      //(reply, string msg) = await client.GetFullNameAsync(new SampleRequest { FirstName = "throw", LastName = "exception" });
+      
+      await Task.Delay(800);
+      if (msg != Constant.Success) errMsg = msg;
+    }
+    catch (Exception ex)
+    {
+      errMsg = $"出現例外！{ex.Message}";
+    }
+    finally
+    {
+      f_loading = false;
+    }
+  }
+
+  async Task HandleSaveProduct()
+  {
+    f_loading = true;
+    saveReply = await client.SaveProductAsync();
+    f_loading = false;
+  }
+
+}

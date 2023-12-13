@@ -1,4 +1,3 @@
-using BlazorServerApp.Data;
 using BlazorServerApp.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
@@ -30,4 +29,5 @@ app.UseRouting();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
+Console.WriteLine("BlazorServerApp is runing.");
 app.Run();
