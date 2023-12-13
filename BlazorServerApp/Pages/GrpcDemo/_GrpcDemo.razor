@@ -35,7 +35,7 @@
   <ol>
     @foreach (var product in listReply.Products)
     {
-      <li>@($"{product.ProductName} | {product.ProductCode} | {product.Price}")</li>
+      <li>@($"{product.ProductName} | {product.ProductCode} | {product.Price} | {product.StockDate} | {product.StockDate.ToDateTimeOffset().ToLocalTime()}")</li>
     }
   </ol>
 }
@@ -83,16 +83,36 @@
 
   async Task HandleSaveProduct()
   {
-    f_loading = true;
-    saveReply = await client.SaveProductAsync();
-    f_loading = false;
+    try
+    {
+      f_loading = true;
+      saveReply = await client.SaveProductAsync();
+    }
+    catch (Exception ex)
+    {
+      errMsg = $"出現例外！{ex.Message}";
+    }
+    finally
+    {
+      f_loading = false;
+    }
   }
 
   async Task HandleGetProductList()
   {
-    f_loading = true;
-    listReply = await client.GetProductListAsync();
-    f_loading = false;
+    try
+    {
+      f_loading = true;
+      listReply = await client.GetProductListAsync();
+    }
+    catch (Exception ex)
+    {
+      errMsg = $"出現例外！{ex.Message}";
+    }
+    finally
+    {
+      f_loading = false;
+    }
   }
 
 }

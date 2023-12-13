@@ -1,4 +1,5 @@
 ﻿using BlazorServerApp.Models;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Grpc.Net.Client;
 using GrpcDemoService;
@@ -28,7 +29,7 @@ internal class MyGrpcClient
 
   public async Task<(SampleReply? reply, string errMsg)> GetFullNameAsync(SampleRequest req)
   {
-    if(req.FirstName == "logical" && req.LastName == "error")
+    if (req.FirstName == "logical" && req.LastName == "error")
       return (null, "測試發生邏輯錯誤。");
 
     using var channel = GrpcChannel.ForAddress(gRPCHostAddress);
@@ -44,11 +45,17 @@ internal class MyGrpcClient
     using var channel = GrpcChannel.ForAddress(gRPCHostAddress);
     var client = new Product.ProductClient(channel);
 
+    //※ gRCP 的日期格式必需是 UTC。
+    //Timestamp stockDate = Timestamp.FromDateTime(DateTime.SpecifyKind(new DateTime(2023, 12, 13), DateTimeKind.Utc));
+    Timestamp stockDate = Timestamp.FromDateTime(new DateTime(2023, 12, 13).ToUniversalTime());
+    //Timestamp stockDate = Timestamp.FromDateTimeOffset(DateTimeOffset.Now);
+
     var dataModel = new ProductModel
     {
       ProductName = "Macbook Pro",
       ProductCode = "P1001",
-      Price = 5000
+      Price = 5000,
+      StockDate = stockDate 
     };
 
     var reply = await client.SaveProductAsync(dataModel);
@@ -60,7 +67,7 @@ internal class MyGrpcClient
     using var channel = GrpcChannel.ForAddress(gRPCHostAddress);
     var client = new Product.ProductClient(channel);
 
-    var reply = await client.GetProductsAsync(new Google.Protobuf.WellKnownTypes.Empty());
+    var reply = await client.GetProductsAsync(new Empty());
     return reply;
   }
 }
