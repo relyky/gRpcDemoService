@@ -26,4 +26,18 @@ public class StreamDemoService : StreamDemo.StreamDemoBase
       await Task.Delay(delayTime);
     }
   }
+
+  public override async Task<Test> ClientStreamDemo(IAsyncStreamReader<Test> reqStream, ServerCallContext ctx)
+  {
+    int receiveCount = 0;
+    while(await reqStream.MoveNext()) 
+    {
+      var msg = reqStream.Current;
+      receiveCount++;
+      _logger.LogInformation($"已收到：{msg.Message}");
+    }
+
+    _logger.LogInformation($"Client Streaming Completed.");
+    return new Test { Message = $"茲收到訊息{receiveCount}條。" };
+  }
 }
