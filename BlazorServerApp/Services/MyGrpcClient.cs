@@ -21,6 +21,8 @@ internal class MyGrpcClient
     using var channel = GrpcChannel.ForAddress(gRPCHostAddress);
     var client = new Greeter.GreeterClient(channel);
     var reply = await client.SayHelloAsync(req);
+
+    await channel.ShutdownAsync();
     return reply;
   }
 
@@ -50,6 +52,15 @@ internal class MyGrpcClient
     };
 
     var reply = await client.SaveProductAsync(dataModel);
+    return reply;
+  }
+
+  public async Task<ProductListReply> GetProductListAsync()
+  {
+    using var channel = GrpcChannel.ForAddress(gRPCHostAddress);
+    var client = new Product.ProductClient(channel);
+
+    var reply = await client.GetProductsAsync(new Google.Protobuf.WellKnownTypes.Empty());
     return reply;
   }
 }

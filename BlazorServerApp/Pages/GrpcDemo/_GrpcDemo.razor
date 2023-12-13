@@ -9,6 +9,7 @@
 <button class="btn btn-primary" @onclick=HandleHello>Hello</button>
 <button class="btn btn-primary" @onclick=HandleGetFullName>Get fullname</button>
 <button class="btn btn-primary" @onclick=HandleSaveProduct>Save product</button>
+<button class="btn btn-primary" @onclick=HandleGetProductList>Get product list</button>
 
 @if (f_loading)
 {
@@ -26,11 +27,23 @@
 
 <pre>訊息: @helloReply?.Message</pre>
 <pre>全名: @reply?.FullName</pre>
-<pre>SaveReply: @($"{saveReply?.IsSuccessful} | {saveReply?.StatusCode}")  </pre>
+<pre>SaveReply: @($"{saveReply?.IsSuccessful} | {saveReply?.StatusCode}")</pre>
+
+<h6>Product List Reply</h6>
+@if (listReply != null)
+{
+  <ol>
+    @foreach (var product in listReply.Products)
+    {
+      <li>@($"{product.ProductName} | {product.ProductCode} | {product.Price}")</li>
+    }
+  </ol>
+}
 
 @code {
   HelloReply? helloReply = null;
   ProductSaveReply? saveReply = null;
+  ProductListReply? listReply = null;
 
   bool f_loading = false;
   string? errMsg = null;
@@ -54,7 +67,7 @@
 
       // 例外處理
       //(reply, string msg) = await client.GetFullNameAsync(new SampleRequest { FirstName = "throw", LastName = "exception" });
-      
+
       await Task.Delay(800);
       if (msg != Constant.Success) errMsg = msg;
     }
@@ -72,6 +85,13 @@
   {
     f_loading = true;
     saveReply = await client.SaveProductAsync();
+    f_loading = false;
+  }
+
+  async Task HandleGetProductList()
+  {
+    f_loading = true;
+    listReply = await client.GetProductListAsync();
     f_loading = false;
   }
 
