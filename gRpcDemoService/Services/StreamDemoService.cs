@@ -3,16 +3,10 @@ using GrpcDemoService;
 
 namespace GrpcDemoService.Services;
 
-public class StreamDemoService : StreamDemo.StreamDemoBase
+public class StreamDemoService(ILogger<StreamDemoService> _logger)
+  : StreamDemo.StreamDemoBase
 {
-  readonly ILogger<StreamDemoService> _logger;
-  Random _random;
-
-  public StreamDemoService(ILogger<StreamDemoService> logger)
-  {
-    _logger = logger;
-    _random = new Random();
-  }
+  Random _random = new Random();
 
   public override async Task ServerStreamDemo(Test req, IServerStreamWriter<Test> replyStream, ServerCallContext ctx)
   {
@@ -31,7 +25,7 @@ public class StreamDemoService : StreamDemo.StreamDemoBase
   public override async Task<Test> ClientStreamDemo(IAsyncStreamReader<Test> reqStream, ServerCallContext ctx)
   {
     int receiveCount = 0;
-    while(await reqStream.MoveNext()) 
+    while(await reqStream.MoveNext())
     {
       var msg = reqStream.Current;
       receiveCount++;

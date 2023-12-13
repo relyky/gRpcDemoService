@@ -11,12 +11,6 @@ internal class MyGrpcClient
   //## Resource
   string gRPCHostAddress = @"https://localhost:7176"; // http://localhost:5220, 
 
-  readonly ILogger<MyGrpcClient> _logger;
-  public MyGrpcClient(ILogger<MyGrpcClient> logger)
-  {
-    _logger = logger;
-  }
-
   public async Task<HelloReply> HelloAsync(HelloRequest req)
   {
     using var channel = GrpcChannel.ForAddress(gRPCHostAddress);
@@ -55,7 +49,7 @@ internal class MyGrpcClient
       ProductName = "Macbook Pro",
       ProductCode = "P1001",
       Price = 5000,
-      StockDate = stockDate 
+      StockDate = stockDate
     };
 
     var reply = await client.SaveProductAsync(dataModel);

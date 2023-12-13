@@ -7,14 +7,9 @@ using System.Reflection.Metadata;
 
 namespace GrpcDemoService.Services;
 
-public class ProductService : Product.ProductBase
+public class ProductService(ILogger<ProductService> _logger)
+  : Product.ProductBase
 {
-  readonly ILogger<ProductService> _logger;
-  public ProductService(ILogger<ProductService> logger)
-  {
-    _logger = logger;
-  }
-
   public override Task<ProductSaveReply> SaveProduct(ProductModel req, ServerCallContext ctx)
   {
     try
@@ -54,7 +49,7 @@ public class ProductService : Product.ProductBase
       reply.Products.Add(product1);
       reply.Products.Add(product2);
       reply.Products.Add(product3);
-      
+
       return Task.FromResult(reply);
     }
     catch (Exception ex)
