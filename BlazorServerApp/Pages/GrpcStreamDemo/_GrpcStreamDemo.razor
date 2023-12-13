@@ -1,0 +1,57 @@
+﻿@using Grpc.Net.Client
+@using GrpcDemoService
+@page "/grpcstreamdemo"
+@inject MyGrpcClient client
+
+<PageTitle>gRPC stream demo</PageTitle>
+
+<h3>gRPC stream demo</h3>
+<button class="btn btn-primary" disabled=@f_loading @onclick=HandleReset>Reset</button>
+<button class="btn btn-primary" disabled=@f_loading @onclick=HandleServerStreamDemo>Server stream</button>
+
+<h6>回應訊息</h6>
+<ol>
+  @foreach (string message in messageList)
+  {
+    <li>@message</li>
+  }
+</ol>
+
+@code {
+  //## Resource
+  string gRPCHostAddress = @"https://localhost:7176"; // http://localhost:5220,
+
+  bool f_loading = false;
+  List<string> messageList = new();
+
+  Task HandleReset()
+  {
+    messageList.Clear();
+    return Task.CompletedTask;
+  }
+
+  async Task HandleServerStreamDemo()
+  {
+    try
+    {
+      f_loading = true;
+
+      using var channel = GrpcChannel.ForAddress(gRPCHostAddress);
+      var client = new StreamDemo.StreamDemoClient(channel);
+      var reply = client.ServerStreamDemo(new Test { Message = "測試" });
+
+      while (await reply.ResponseStream.MoveNext(CancellationToken.None))
+      {
+        var msg = reply.ResponseStream.Current;
+        messageList.Add($"收到訊息: {msg.Message}");
+        await InvokeAsync(StateHasChanged);
+      }
+
+      messageList.Add($"Server Streaming Completed.");
+    }
+    finally
+    {
+      f_loading = false;
+    }
+  }
+}

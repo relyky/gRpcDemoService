@@ -21,6 +21,9 @@
     <Protobuf Include="..\gRpcDemoService\Protos\sample.proto" GrpcServices="Client">
       <Link>Protos\sample.proto</Link>
     </Protobuf>
+    <Protobuf Include="..\gRpcDemoService\Protos\streamdemo.proto" GrpcServices="Client">
+      <Link>Protos\streamdemo.proto</Link>
+    </Protobuf>
   </ItemGroup>
 
 </Project>
