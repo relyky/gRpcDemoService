@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Protobuf Include="Protos\authentication.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\greet.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\streamdemo.proto" GrpcServices="Server" />
     <Protobuf Include="Protos\sample.proto" GrpcServices="Server" />
@@ -18,7 +19,9 @@
 
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.59.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.25" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.0.3" />
   </ItemGroup>
 
 </Project>
