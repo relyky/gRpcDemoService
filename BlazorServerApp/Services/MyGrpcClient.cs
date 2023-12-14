@@ -34,6 +34,29 @@ internal class MyGrpcClient
     return (reply, Constant.Success);
   }
 
+  /// <summary>
+  /// ------ 臨時取名測試 登入機制，正式版建議存在後端，比如：Cache。
+  /// </summary>
+  public async Task<(SampleReply? reply, string errMsg)> Auth_GetFullNameAsync(SampleRequest req, AuthenticationReply authReply)
+  {
+    if (req.FirstName == "logical" && req.LastName == "error")
+      return (null, "測試發生邏輯錯誤。");
+
+    if (authReply == null)
+      return (null, "需先登入認證。");
+
+    // 附上 Access Token
+    var headers = new Metadata();
+    headers.Add("Authorization", $"Bearer {authReply.AccessToken}");
+
+    using var channel = GrpcChannel.ForAddress(gRPCHostAddress);
+    var client = new Sample.SampleClient(channel);
+    var reply = await client.GetFullNameAsync(req, headers);
+
+    await channel.ShutdownAsync();
+    return (reply, Constant.Success);
+  }
+
   public async Task<ProductSaveReply> SaveProductAsync()
   {
     using var channel = GrpcChannel.ForAddress(gRPCHostAddress);

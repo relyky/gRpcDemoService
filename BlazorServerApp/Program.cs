@@ -7,8 +7,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddSingleton<WeatherForecastService>();
+
+/// 註冊：客製服務
+builder.Services.AddSingleton<AccountService>();
 builder.Services.AddScoped<MyGrpcClient>();
+builder.Services.AddScoped<WeatherForecastService>();
 
 var app = builder.Build();
 

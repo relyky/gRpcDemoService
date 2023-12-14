@@ -6,6 +6,11 @@ package sample;
 
 service Sample {
   rpc GetFullName (SampleRequest) returns (SampleReply);
+
+  // 數學計算
+  rpc Add (InputNumbers) returns (CalculationResult);
+  rpc Subtract (InputNumbers) returns (CalculationResult);
+  rpc Multiply (InputNumbers) returns (CalculationResult);
 }
 
 message SampleRequest {
@@ -16,3 +21,13 @@ message SampleRequest {
 message SampleReply {
   string fullName = 1;
 }
+
+// for 數學計算
+message InputNumbers {
+  int32 number1 = 1;
+  int32 number2 = 2;
+}
+
+message CalculationResult {
+  int32 Result = 1;
+} 

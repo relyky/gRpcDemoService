@@ -1,0 +1,98 @@
+﻿@page "/login"
+@using GrpcDemoService
+@inject AccountService accSvc
+@inject MyGrpcClient client
+
+<PageTitle>登入</PageTitle>
+
+<h3>Login</h3>
+
+@if (f_loading)
+{
+  <div class="progress">
+    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+  </div>
+}
+
+@if (errMsg != null)
+{
+  <div class="alert alert-danger my-3" role="alert">
+    @errMsg
+  </div>
+}
+
+<button class="btn btn-primary" @onclick=HandleLogin>模擬登入</button>
+<button class="btn btn-primary" @onclick=HandleCallSample>Call Sample</button>
+
+<h5 class="pb-1">Authentication</h5>
+@if (authReply != null)
+{
+  <table class="table">
+    <tbody>
+      <tr>
+        <td>AccessToken</td>
+        <td>@authReply?.AccessToken</td>
+      </tr>
+      <tr>
+        <td>ExpiresIn</td>
+        <td>@authReply?.ExpiresIn</td>
+      </tr>
+    </tbody>
+  </table>
+}
+
+<h5 class="pb-1">sampleReply</h5>
+@if (sampleReply != null)
+{
+  <p>FullName: @sampleReply?.FullName</p>
+}
+
+@code {
+  bool f_loading = false;
+  string? errMsg = null;
+
+  AuthenticationReply? authReply = null;
+  SampleReply? sampleReply = null;
+
+  async Task HandleLogin()
+  {
+    try
+    {
+      errMsg = null;
+      f_loading = true;
+      authReply = await accSvc.Authenticate(new AuthenticationRequest { UserName = "admin", UserPassword = "admin" });
+    }
+    catch (Exception ex)
+    {
+      errMsg = $"出現例外！{ex.Message}";
+    }
+    finally
+    {
+      f_loading = false;
+    }
+  }
+
+  async Task HandleCallSample()
+  {
+    try
+    {
+      sampleReply = null;
+      errMsg = null;
+      f_loading = true;
+
+      (sampleReply, string msg) = await client.Auth_GetFullNameAsync(
+        new SampleRequest { FirstName = "Smart", LastName = "Hao" }, 
+        authReply!);
+
+      if (msg != "SUCCESS") errMsg = msg;
+    }
+    catch (Exception ex)
+    {
+      errMsg = $"出現例外！{ex.Message}";
+    }
+    finally
+    {
+      f_loading = false;
+    }
+  }
+}

@@ -5,12 +5,15 @@ using System.Text;
 
 namespace GrpcDemoService;
 
+/// <summary>
+/// ------ 預計正式版轉成：不公開的 Singleton injectable service
+/// </summary>
 static class JwtAuthenticationManager
 {
   //const string JWT_TOKEN_KEY = @"Show Me The Money @2023";
   const int JWT_TOKEN_VALIDITY_MINUTES = 30;
 
-  public static string JWT_TOKEN_KEY => @"Show Me The Money @2023";
+  public static string JWT_TOKEN_KEY => @"Show Me The Money @2023 Show Me The Money";
 
   public static AuthenticationReply? Authenticate(AuthenticationRequest req)
   {
