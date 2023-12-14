@@ -12,9 +12,8 @@ static class JwtAuthenticationManager
 {
   //const string JWT_TOKEN_KEY = @"Show Me The Money @2023";
   const int JWT_TOKEN_VALIDITY_MINUTES = 30;
-
-  public static string JWT_TOKEN_KEY => @"Show Me The Money @2023 Show Me The Money";
-
+  public static string JWT_TOKEN_KEY => @"12345678901234567890123456789012"; // 32 密碼長度需與演算法匹配。
+  public static string JWE_SECRET_KEY => @"12345678901234567890123456789012"; // 32 密碼長度需與演算法匹配。
   public static AuthenticationReply? Authenticate(AuthenticationRequest req)
   {
     //## Implement User Credentials Validation --------------------------------
@@ -23,11 +22,10 @@ static class JwtAuthenticationManager
 
     //-------------------------------------------------------------------------
     var tokenKey = Encoding.ASCII.GetBytes(JWT_TOKEN_KEY);
+    var secretKey = Encoding.ASCII.GetBytes(JWE_SECRET_KEY);
     var tokenExpiryUtc = DateTime.Now.AddMinutes(JWT_TOKEN_VALIDITY_MINUTES).ToUniversalTime();
 
-    var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
-
-    var securityToken = jwtSecurityTokenHandler.CreateToken(new SecurityTokenDescriptor
+    var tokenDescriptor = new SecurityTokenDescriptor
     {
       Subject = new ClaimsIdentity(new[]
       {
@@ -35,9 +33,12 @@ static class JwtAuthenticationManager
         new Claim(ClaimTypes.Role, "Admin")
       }),
       Expires = tokenExpiryUtc,
-      SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenKey), SecurityAlgorithms.HmacSha256Signature)
-    });
+      SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenKey), SecurityAlgorithms.HmacSha256Signature),
+      EncryptingCredentials = new EncryptingCredentials(new SymmetricSecurityKey(secretKey), SecurityAlgorithms.Aes256KW, SecurityAlgorithms.Aes256CbcHmacSha512) // JWE
+    };
 
+    var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+    var securityToken = jwtSecurityTokenHandler.CreateToken(tokenDescriptor);
     var token = jwtSecurityTokenHandler.WriteToken(securityToken);
 
     return new AuthenticationReply

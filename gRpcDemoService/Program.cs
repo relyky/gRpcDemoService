@@ -22,6 +22,7 @@ builder.Services.AddAuthentication(options =>
   {
     ValidateIssuerSigningKey = true,
     IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(JwtAuthenticationManager.JWT_TOKEN_KEY)),
+    TokenDecryptionKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(JwtAuthenticationManager.JWE_SECRET_KEY)), // JWE
     ValidateIssuer = false,     // true; 正式版應該要加入驗證
     ValidateAudience = false    // true; 正式版應該要加入驗證
   };
