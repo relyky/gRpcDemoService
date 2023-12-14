@@ -5,43 +5,57 @@
 @inject WeatherForecastService ForecastService
 
 <h1>Weather forecast</h1>
-
+<button class="btn btn-primary" @onclick=HandleQuery>查詢</button>
 <p>This component demonstrates fetching data from a service.</p>
 
-@if (forecasts == null)
+@if (f_loading)
 {
-    <p><em>Loading...</em></p>
+  <div class="progress">
+    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+  </div>
 }
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var forecast in forecasts)
-            {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Temp. (C)</th>
+      <th>Temp. (F)</th>
+      <th>Summary</th>
+    </tr>
+  </thead>
+  <tbody>
+    @foreach (var forecast in forecasts)
+    {
+      <tr>
+        <td>@forecast.Date.ToShortDateString()</td>
+        <td>@forecast.TemperatureC</td>
+        <td>@forecast.TemperatureF</td>
+        <td>@forecast.Summary</td>
+      </tr>
+    }
+  </tbody>
+</table>
 
 @code {
-    private WeatherForecast[]? forecasts;
+  bool f_loading = false;
+  List<WeatherForecast> forecasts = new();
 
-    protected override async Task OnInitializedAsync()
+  // protected override async Task OnInitializedAsync()
+  // {
+  //   forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
+  // }
+
+  async Task HandleQuery()
+  {
+    f_loading = true;
+
+    await foreach (var item in ForecastService.GetForecastsStreamAsync())
     {
-        forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
+      forecasts.Add(item);
+      StateHasChanged();
     }
+
+    f_loading = false;
+  }
 }
