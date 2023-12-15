@@ -89,7 +89,7 @@ internal class MyGrpcClient(ILoggerFactory loggerFactory)
     using var channel = GrpcChannel.ForAddress(gRPCHostAddress);
     var client = new Product.ProductClient(channel);
 
-    var reply = await client.GetProductsAsync(new Empty());
+    var reply = await client.GetProductsAsync(new Empty(), deadline: DateTime.UtcNow.AddSeconds(3)); // 測試 deadline
     return reply;
   }
 

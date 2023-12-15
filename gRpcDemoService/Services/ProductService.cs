@@ -32,10 +32,12 @@ public class ProductService(ILogger<ProductService> _logger)
     }
   }
 
-  public override Task<ProductListReply> GetProducts(Empty req, ServerCallContext ctx)
+  public override async Task<ProductListReply> GetProducts(Empty req, ServerCallContext ctx)
   {
     try
     {
+      await Task.Delay(5000); // 測試 deadline
+
       //※ gRCP 的日期格式必需是 UTC。
       //var stockDate = Timestamp.FromDateTime(DateTime.SpecifyKind(new DateTime(2023, 12, 13), DateTimeKind.Utc));
       //var stockDate = Timestamp.FromDateTimeOffset(DateTimeOffset.UtcNow);
@@ -50,7 +52,7 @@ public class ProductService(ILogger<ProductService> _logger)
       reply.Products.Add(product2);
       reply.Products.Add(product3);
 
-      return Task.FromResult(reply);
+      return reply;
     }
     catch (Exception ex)
     {
