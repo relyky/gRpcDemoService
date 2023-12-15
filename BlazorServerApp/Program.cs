@@ -1,6 +1,9 @@
 using BlazorServerApp.Services;
+using Grpc.Net.Client;
+using GrpcDemoService;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +11,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
-/// 註冊：客製服務
+//## 註冊：gRPC 攔截器
+builder.Services.AddSingleton<GrpcLoggerInterceptor>();
+
+//## 註冊：gRPC Client Service
+builder.Services.AddGrpcClient<Product.ProductClient>(options =>
+{
+  options.Address = new Uri(@"https://localhost:7176");
+}).AddInterceptor<GrpcLoggerInterceptor>();
+
+//## 註冊：客製服務
 builder.Services.AddSingleton<AccountService>();
 builder.Services.AddScoped<MyGrpcClient>();
 builder.Services.AddScoped<WeatherForecastService>();

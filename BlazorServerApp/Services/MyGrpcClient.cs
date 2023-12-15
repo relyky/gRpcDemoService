@@ -59,39 +59,39 @@ internal class MyGrpcClient(ILoggerFactory loggerFactory)
     return (reply, Constant.Success);
   }
 
-  public async Task<ProductSaveReply> SaveProductAsync()
-  {
-    using var channel = GrpcChannel.ForAddress(gRPCHostAddress);
-    var invoker = channel.Intercept(new GrpcLoggerInterceptor(loggerFactory));
+  //public async Task<ProductSaveReply> SaveProductAsync()
+  //{
+  //  using var channel = GrpcChannel.ForAddress(gRPCHostAddress);
+  //  var invoker = channel.Intercept(new GrpcLoggerInterceptor(loggerFactory));
 
-    var client = new Product.ProductClient(invoker);
-    //var client = new Product.ProductClient(channel);
+  //  var client = new Product.ProductClient(invoker);
+  //  //var client = new Product.ProductClient(channel);
 
-    //※ gRCP 的日期格式必需是 UTC。
-    //Timestamp stockDate = Timestamp.FromDateTime(DateTime.SpecifyKind(new DateTime(2023, 12, 13), DateTimeKind.Utc));
-    Timestamp stockDate = Timestamp.FromDateTime(new DateTime(2023, 12, 13).ToUniversalTime());
-    //Timestamp stockDate = Timestamp.FromDateTimeOffset(DateTimeOffset.Now);
+  //  //※ gRCP 的日期格式必需是 UTC。
+  //  //Timestamp stockDate = Timestamp.FromDateTime(DateTime.SpecifyKind(new DateTime(2023, 12, 13), DateTimeKind.Utc));
+  //  Timestamp stockDate = Timestamp.FromDateTime(new DateTime(2023, 12, 13).ToUniversalTime());
+  //  //Timestamp stockDate = Timestamp.FromDateTimeOffset(DateTimeOffset.Now);
 
-    var dataModel = new ProductModel
-    {
-      ProductName = "Macbook Pro",
-      ProductCode = "P1001",
-      Price = 5000,
-      StockDate = stockDate
-    };
+  //  var dataModel = new ProductModel
+  //  {
+  //    ProductName = "Macbook Pro",
+  //    ProductCode = "P1001",
+  //    Price = 5000,
+  //    StockDate = stockDate
+  //  };
 
-    var reply = await client.SaveProductAsync(dataModel);
-    return reply;
-  }
+  //  var reply = await client.SaveProductAsync(dataModel);
+  //  return reply;
+  //}
 
-  public async Task<ProductListReply> GetProductListAsync()
-  {
-    using var channel = GrpcChannel.ForAddress(gRPCHostAddress);
-    var client = new Product.ProductClient(channel);
-
-    var reply = await client.GetProductsAsync(new Empty(), deadline: DateTime.UtcNow.AddSeconds(3)); // 測試 deadline
-    return reply;
-  }
+  //public async Task<ProductListReply> GetProductListAsync()
+  //{
+  //  using var channel = GrpcChannel.ForAddress(gRPCHostAddress);
+  //  var client = new Product.ProductClient(channel);
+  //
+  //  var reply = await client.GetProductsAsync(new Empty(), deadline: DateTime.UtcNow.AddSeconds(3)); // 測試 deadline
+  //  return reply;
+  //}
 
   public async Task<AuthStateReply> GetAuthStateAsync(AuthenticationReply authReply)
   {

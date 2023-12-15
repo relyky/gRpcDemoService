@@ -1,6 +1,7 @@
 ﻿@using GrpcDemoService
 @page "/grpcdemo"
 @inject MyGrpcClient client
+@inject Product.ProductClient prodClient
 
 <PageTitle>gRPC unary demo</PageTitle>
 
@@ -86,7 +87,18 @@
     try
     {
       f_loading = true;
-      saveReply = await client.SaveProductAsync();
+
+      var dataModel = new ProductModel
+        {
+          ProductName = "Macbook Pro 9",
+          ProductCode = "P9001",
+          Price = 9999,
+          StockDate = Google.Protobuf.WellKnownTypes.Timestamp.FromDateTimeOffset(DateTimeOffset.UtcNow)
+        };
+
+      saveReply = await prodClient.SaveProductAsync(dataModel);
+
+      //saveReply = await client.SaveProductAsync();
     }
     catch (Exception ex)
     {
@@ -103,7 +115,10 @@
     try
     {
       f_loading = true;
-      listReply = await client.GetProductListAsync();
+      //listReply = await client.GetProductListAsync();
+
+      listReply = await prodClient.GetProductsAsync(new Google.Protobuf.WellKnownTypes.Empty(),
+                        deadline: DateTime.UtcNow.AddSeconds(3)); // 測試 deadline, 主機端要跑５秒。
     }
     catch (Exception ex)
     {

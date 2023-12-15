@@ -13,7 +13,7 @@ public class GrpcLoggerInterceptor : Interceptor
 
   public GrpcLoggerInterceptor(ILoggerFactory loggerFactory)
   {
-    _logger = loggerFactory.CreateLogger<GrpcLoggerInterceptor>();
+    _logger = loggerFactory.CreateLogger<GrpcLoggerInterceptor>(); // Logger 不知寫到那了！
   }
 
   /// <summary>
