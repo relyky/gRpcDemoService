@@ -1,4 +1,6 @@
 syntax = "proto3";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 
 option csharp_namespace = "GrpcDemoService";
 
@@ -6,6 +8,7 @@ package authentication;
 
 service Authentication {
   rpc Authenticate (AuthenticationRequest) returns (AuthenticationReply);
+  rpc GetAuthState (google.protobuf.Empty) returns (AuthStateReply);
 }
 
 message AuthenticationRequest {
@@ -16,4 +19,13 @@ message AuthenticationRequest {
 message AuthenticationReply {
   string accessToken = 1;
   int32 expiresIn = 2;
+}
+
+message AuthStateReply {
+  string userId = 1;
+  string userName = 2;
+  string roles = 3;
+  google.protobuf.Timestamp issuedAtUtc = 4;
+  google.protobuf.Timestamp notBeforeUtc = 5;
+  google.protobuf.Timestamp expiresUtc = 6;
 }

@@ -25,34 +25,56 @@
 <button class="btn btn-primary" @onclick=HandleCallSample>Call Sample</button>
 
 <h5 class="pb-1">Authentication</h5>
-@if (authReply != null)
+@if (tokenReply != null)
 {
   <table class="table">
     <tbody>
       <tr>
         <td>AccessToken</td>
-        <td>@authReply?.AccessToken</td>
+        <td style="overflow-wrap:anywhere;">@tokenReply?.AccessToken</td>
       </tr>
       <tr>
         <td>ExpiresIn</td>
-        <td>@authReply?.ExpiresIn</td>
+        <td>@tokenReply?.ExpiresIn</td>
+      </tr>
+      <tr>
+        <td>Auth State</td>
+        <td>@authReply?.UserId | @authReply?.UserName | @authReply?.Roles</td>
+      </tr>
+      <tr>
+        <td>Auth State 2</td>
+        <td>@authReply?.IssuedAtUtc?.ToDateTime().ToLocalTime() | @authReply?.NotBeforeUtc?.ToDateTime().ToLocalTime() | @authReply?.ExpiresUtc?.ToDateTime().ToLocalTime()</td>
       </tr>
     </tbody>
   </table>
 }
 
-<h5 class="pb-1">sampleReply</h5>
+<h5 class="pb-1">Sample Reply</h5>
 @if (sampleReply != null)
 {
   <p>FullName: @sampleReply?.FullName</p>
+}
+
+<h5 class="pb-1">Message List</h5>
+@if (messageList != null)
+{
+  <ol>
+    @foreach(string message in messageList)
+    {
+      <li>@message</li>      
+    }
+  </ol>
 }
 
 @code {
   bool f_loading = false;
   string? errMsg = null;
 
-  AuthenticationReply? authReply = null;
+  AuthenticationReply? tokenReply = null;
+  AuthStateReply? authReply = null;
   SampleReply? sampleReply = null;
+
+  List<string> messageList = new();
 
   async Task HandleLogin()
   {
@@ -60,7 +82,8 @@
     {
       errMsg = null;
       f_loading = true;
-      authReply = await accSvc.Authenticate(new AuthenticationRequest { UserName = "admin", UserPassword = "admin" });
+      tokenReply = await accSvc.AuthenticateAsync(new AuthenticationRequest { UserName = "admin", UserPassword = "admin" });
+      authReply = await client.GetAuthStateAsync(tokenReply);
     }
     catch (Exception ex)
     {
@@ -81,14 +104,22 @@
       f_loading = true;
 
       (sampleReply, string msg) = await client.Auth_GetFullNameAsync(
-        new SampleRequest { FirstName = "Smart", LastName = "Hao" }, 
-        authReply!);
+        new SampleRequest { FirstName = $"Smart{DateTime.Now:mm:ss}", LastName = "Hao" }, 
+        tokenReply!);
+
+      // for debug
+      messageList.Add($"Call sample @{DateTime.Now:HH:mm:ss} → {msg}");
+
+      await Task.Delay(800); // UX
 
       if (msg != "SUCCESS") errMsg = msg;
     }
     catch (Exception ex)
     {
       errMsg = $"出現例外！{ex.Message}";
+
+      // for debug
+      messageList.Add($"Call sample @{DateTime.Now:HH:mm:ss} → {errMsg}");
     }
     finally
     {

@@ -13,7 +13,7 @@ internal class AccountService
   // Authenticate
   // Authorize
 
-  public async Task<AuthenticationReply> Authenticate(AuthenticationRequest req)
+  public async Task<AuthenticationReply> AuthenticateAsync(AuthenticationRequest req)
   {
     using var channel = GrpcChannel.ForAddress(gRPCHostAddress);
     var client = new Authentication.AuthenticationClient(channel);

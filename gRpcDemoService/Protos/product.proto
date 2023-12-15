@@ -19,7 +19,7 @@ message ProductModel {
   string productName = 1;
   string productCode = 2;
   double price = 3;
-  google.protobuf.Timestamp StockDate = 4;
+  google.protobuf.Timestamp stockDate = 4;
 }
 
 message ProductSaveReply {

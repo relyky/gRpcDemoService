@@ -87,4 +87,16 @@ internal class MyGrpcClient
     var reply = await client.GetProductsAsync(new Empty());
     return reply;
   }
+
+  public async Task<AuthStateReply> GetAuthStateAsync(AuthenticationReply authReply)
+  {
+    // 附上 Access Token
+    var headers = new Metadata();
+    headers.Add("Authorization", $"Bearer {authReply.AccessToken}");
+
+    using var channel = GrpcChannel.ForAddress(gRPCHostAddress);
+    var client = new Authentication.AuthenticationClient(channel);
+    var reply = await client.GetAuthStateAsync(new Empty(), headers);
+    return reply;
+  }
 }

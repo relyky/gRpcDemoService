@@ -18,13 +18,14 @@ builder.Services.AddAuthentication(options =>
 {
   options.RequireHttpsMetadata = false;
   options.SaveToken = true;
-  options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+  options.TokenValidationParameters = new TokenValidationParameters
   {
     ValidateIssuerSigningKey = true,
     IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(JwtAuthenticationManager.JWT_TOKEN_KEY)),
     TokenDecryptionKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(JwtAuthenticationManager.JWE_SECRET_KEY)), // JWE
-    ValidateIssuer = false,     // true; 正式版應該要加入驗證
-    ValidateAudience = false    // true; 正式版應該要加入驗證
+    ValidateIssuer = false,     // true; 正式版應該要加入驗證，然實際意義不大。
+    ValidateAudience = false,   // true; 正式版應該要加入驗證，然實際意義不大。
+    ClockSkew = TimeSpan.Zero,  // 時鐘偏差，預設為5分鐘。當 expires 時間過了仍有小段時間有效。
   };
 });
 

@@ -46,7 +46,7 @@
       {
         var msg = reply.ResponseStream.Current;
         messageList.Add($"收到訊息: {msg.Message}");
-        // await InvokeAsync(StateHasChanged);
+        StateHasChanged();
       }
 
       messageList.Add($"Server Streaming Completed.");

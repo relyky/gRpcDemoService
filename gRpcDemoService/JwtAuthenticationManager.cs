@@ -11,7 +11,7 @@ namespace GrpcDemoService;
 static class JwtAuthenticationManager
 {
   //const string JWT_TOKEN_KEY = @"Show Me The Money @2023";
-  const int JWT_TOKEN_VALIDITY_MINUTES = 30;
+  const int JWT_TOKEN_VALIDITY_MINUTES = 1;
   public static string JWT_TOKEN_KEY => @"12345678901234567890123456789012"; // 32 密碼長度需與演算法匹配。
   public static string JWE_SECRET_KEY => @"12345678901234567890123456789012"; // 32 密碼長度需與演算法匹配。
   public static AuthenticationReply? Authenticate(AuthenticationRequest req)
@@ -23,14 +23,15 @@ static class JwtAuthenticationManager
     //-------------------------------------------------------------------------
     var tokenKey = Encoding.ASCII.GetBytes(JWT_TOKEN_KEY);
     var secretKey = Encoding.ASCII.GetBytes(JWE_SECRET_KEY);
-    var tokenExpiryUtc = DateTime.Now.AddMinutes(JWT_TOKEN_VALIDITY_MINUTES).ToUniversalTime();
+    var tokenExpiryUtc = DateTime.UtcNow.AddMinutes(JWT_TOKEN_VALIDITY_MINUTES);
 
     var tokenDescriptor = new SecurityTokenDescriptor
     {
       Subject = new ClaimsIdentity(new[]
       {
         new Claim(ClaimTypes.Name, req.UserName),
-        new Claim(ClaimTypes.Role, "Admin")
+        new Claim(ClaimTypes.Role, "Admin"),
+        new Claim(ClaimTypes.GivenName, "系統管理者"),
       }),
       Expires = tokenExpiryUtc,
       SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(tokenKey), SecurityAlgorithms.HmacSha256Signature),
