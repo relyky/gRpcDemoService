@@ -1,12 +1,14 @@
 ﻿using BlazorServerApp.Models;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using Grpc.Core.Interceptors;
 using Grpc.Net.Client;
 using GrpcDemoService;
+using BlazorServerApp.Services;
 
 namespace BlazorServerApp.Services;
 
-internal class MyGrpcClient
+internal class MyGrpcClient(ILoggerFactory loggerFactory)
 {
   //## Resource
   string gRPCHostAddress = @"https://localhost:7176"; // http://localhost:5220, 
@@ -60,7 +62,10 @@ internal class MyGrpcClient
   public async Task<ProductSaveReply> SaveProductAsync()
   {
     using var channel = GrpcChannel.ForAddress(gRPCHostAddress);
-    var client = new Product.ProductClient(channel);
+    var invoker = channel.Intercept(new GrpcLoggerInterceptor(loggerFactory));
+
+    var client = new Product.ProductClient(invoker);
+    //var client = new Product.ProductClient(channel);
 
     //※ gRCP 的日期格式必需是 UTC。
     //Timestamp stockDate = Timestamp.FromDateTime(DateTime.SpecifyKind(new DateTime(2023, 12, 13), DateTimeKind.Utc));

@@ -2,7 +2,7 @@
 using Grpc.Core;
 using System.Text;
 
-namespace GrpcDemoService.Services;
+namespace BlazorServerApp.Services;
 
 /// <summary>
 /// 參考：[.NET 上的 gRPC 攔截器](https://learn.microsoft.com/zh-tw/aspnet/core/grpc/interceptors?view=aspnetcore-6.0)
@@ -13,7 +13,7 @@ public class GrpcLoggerInterceptor : Interceptor
 
   public GrpcLoggerInterceptor(ILoggerFactory loggerFactory)
   {
-    _logger = loggerFactory.CreateLogger<GrpcLoggerInterceptor>();// ---- 不知寫到那去了？
+    _logger = loggerFactory.CreateLogger<GrpcLoggerInterceptor>();
   }
 
   /// <summary>
