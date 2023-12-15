@@ -29,9 +29,15 @@ builder.Services.AddAuthentication(options =>
   };
 });
 
+// ¥[¤J gRPC ÄdºI¾¹
+builder.Services.AddSingleton<GrpcLoggerInterceptor>();
+
 // Add services to the container.
 builder.Services.AddAuthorization();
-builder.Services.AddGrpc();
+builder.Services.AddGrpc(options =>
+{
+  options.Interceptors.Add<GrpcLoggerInterceptor>();
+});
 
 var app = builder.Build();
 
