@@ -1,11 +1,9 @@
 using BlazorServerApp.Services;
-using Grpc.Net.Client;
+using Grpc.Core;
 using GrpcDemoService;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
-using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
+var _config = builder.Configuration;
 
 // Add services to the container.
 builder.Services.AddRazorPages();
@@ -13,16 +11,37 @@ builder.Services.AddServerSideBlazor();
 
 //## µù¥U¡GgRPC ÄdºI¾¹
 builder.Services.AddSingleton<GrpcLoggerInterceptor>();
+builder.Services.AddScoped<ITokenProvider, AccountService>();
 
-//## µù¥U¡GgRPC Client Service
+Func<AuthInterceptorContext, Metadata, IServiceProvider, Task> grpcAuthInterceptor = async (context, metadata, provider) =>
+{
+  var tokenProvider = provider.GetRequiredService<ITokenProvider>();
+  var accessToken = await tokenProvider.GetTokenAsync(context.CancellationToken);
+  metadata.Add("Authorization", $"Bearer {accessToken}");
+};
+
+//## µù¥U¡GgRPC Client Servic
+builder.Services.AddGrpcClient<Greeter.GreeterClient>(options =>
+{
+  options.Address = new Uri(_config["gRPCHostAddress"]);
+}).AddCallCredentials(grpcAuthInterceptor)
+  .AddInterceptor<GrpcLoggerInterceptor>();
+
+builder.Services.AddGrpcClient<Sample.SampleClient>(options =>
+{
+  options.Address = new Uri(_config["gRPCHostAddress"]);
+}).AddCallCredentials(grpcAuthInterceptor)
+  .AddInterceptor<GrpcLoggerInterceptor>();
+
 builder.Services.AddGrpcClient<Product.ProductClient>(options =>
 {
-  options.Address = new Uri(@"https://localhost:7176");
-}).AddInterceptor<GrpcLoggerInterceptor>();
+  options.Address = new Uri(_config["gRPCHostAddress"]);
+}).AddCallCredentials(grpcAuthInterceptor)
+  .AddInterceptor<GrpcLoggerInterceptor>();
 
 //## µù¥U¡G«È»sªA°È
 builder.Services.AddSingleton<AccountService>();
-builder.Services.AddScoped<MyGrpcClient>();
+builder.Services.AddScoped<MyBizService>();
 builder.Services.AddScoped<WeatherForecastService>();
 
 var app = builder.Build();

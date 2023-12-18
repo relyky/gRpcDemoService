@@ -1,12 +1,11 @@
 ﻿using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using GrpcDemoService;
-using Microsoft.VisualBasic;
-using static Google.Protobuf.WellKnownTypes.Field.Types;
-using System.Reflection.Metadata;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GrpcDemoService.Services;
 
+[Authorize]
 public class ProductService(ILogger<ProductService> _logger)
   : Product.ProductBase
 {
@@ -36,7 +35,7 @@ public class ProductService(ILogger<ProductService> _logger)
   {
     try
     {
-      await Task.Delay(5000); // 測試 deadline
+      await Task.Delay(3000); // 測試 deadline
 
       //※ gRCP 的日期格式必需是 UTC。
       //var stockDate = Timestamp.FromDateTime(DateTime.SpecifyKind(new DateTime(2023, 12, 13), DateTimeKind.Utc));

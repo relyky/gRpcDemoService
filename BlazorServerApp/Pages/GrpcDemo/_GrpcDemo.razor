@@ -1,6 +1,6 @@
 ﻿@using GrpcDemoService
 @page "/grpcdemo"
-@inject MyGrpcClient client
+@inject MyBizService bizSvc
 @inject Product.ProductClient prodClient
 
 <PageTitle>gRPC unary demo</PageTitle>
@@ -52,22 +52,23 @@
 
   async Task HandleHello()
   {
-    helloReply = await client.HelloAsync(new HelloRequest { Name = $"郝聰明 at {DateTime.Now:HH:mm:ss}" });
+    helloReply = await bizSvc.HelloAsync(new HelloRequest { Name = $"郝聰明 at {DateTime.Now:HH:mm:ss}" });
   }
 
   async Task HandleGetFullName()
   {
     try
     {
+      errMsg = null;
       f_loading = true;
 
-      (reply, string msg) = await client.GetFullNameAsync(new SampleRequest { FirstName = "John", LastName = "Big" });
+      (reply, string msg) = await bizSvc.GetFullNameAsync(new SampleRequest { FirstName = "John", LastName = "Big" });
 
       // 邏輯錯誤
-      //(reply, string msg) = await client.GetFullNameAsync(new SampleRequest { FirstName = "logical", LastName = "error" });
+      //(reply, string msg) = await bizSvc.GetFullNameAsync(new SampleRequest { FirstName = "logical", LastName = "error" });
 
       // 例外處理
-      //(reply, string msg) = await client.GetFullNameAsync(new SampleRequest { FirstName = "throw", LastName = "exception" });
+      //(reply, string msg) = await bizSvc.GetFullNameAsync(new SampleRequest { FirstName = "throw", LastName = "exception" });
 
       await Task.Delay(800);
       if (msg != Constant.Success) errMsg = msg;
@@ -86,19 +87,9 @@
   {
     try
     {
+      errMsg = null;
       f_loading = true;
-
-      var dataModel = new ProductModel
-        {
-          ProductName = "Macbook Pro 9",
-          ProductCode = "P9001",
-          Price = 9999,
-          StockDate = Google.Protobuf.WellKnownTypes.Timestamp.FromDateTimeOffset(DateTimeOffset.UtcNow)
-        };
-
-      saveReply = await prodClient.SaveProductAsync(dataModel);
-
-      //saveReply = await client.SaveProductAsync();
+      saveReply = await bizSvc.SaveProductAsync();
     }
     catch (Exception ex)
     {
@@ -114,11 +105,9 @@
   {
     try
     {
+      errMsg = null;
       f_loading = true;
-      //listReply = await client.GetProductListAsync();
-
-      listReply = await prodClient.GetProductsAsync(new Google.Protobuf.WellKnownTypes.Empty(),
-                        deadline: DateTime.UtcNow.AddSeconds(3)); // 測試 deadline, 主機端要跑５秒。
+      listReply = await bizSvc.GetProductListAsync();
     }
     catch (Exception ex)
     {

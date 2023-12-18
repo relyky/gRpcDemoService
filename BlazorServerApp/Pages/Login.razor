@@ -1,7 +1,6 @@
 ﻿@page "/login"
 @using GrpcDemoService
 @inject AccountService accSvc
-@inject MyGrpcClient client
 
 <PageTitle>登入</PageTitle>
 
@@ -22,7 +21,7 @@
 }
 
 <button class="btn btn-primary" @onclick=HandleLogin>模擬登入</button>
-<button class="btn btn-primary" @onclick=HandleCallSample>Call Sample</button>
+<button class="btn btn-primary" @onclick=HandleGetAuthState>取登入狀態</button>
 
 <h5 class="pb-1">Authentication</h5>
 @if (tokenReply != null)
@@ -37,33 +36,26 @@
         <td>ExpiresIn</td>
         <td>@tokenReply?.ExpiresIn</td>
       </tr>
-      <tr>
-        <td>Auth State</td>
-        <td>@authReply?.UserId | @authReply?.UserName | @authReply?.Roles</td>
-      </tr>
-      <tr>
-        <td>Auth State 2</td>
-        <td>@authReply?.IssuedAtUtc?.ToDateTime().ToLocalTime() | @authReply?.NotBeforeUtc?.ToDateTime().ToLocalTime() | @authReply?.ExpiresUtc?.ToDateTime().ToLocalTime()</td>
-      </tr>
     </tbody>
   </table>
 }
 
-<h5 class="pb-1">Sample Reply</h5>
-@if (sampleReply != null)
+<h5 class="pb-1">Auth State</h5>
+@if (authReply != null)
 {
-  <p>FullName: @sampleReply?.FullName</p>
-}
-
-<h5 class="pb-1">Message List</h5>
-@if (messageList != null)
-{
-  <ol>
-    @foreach(string message in messageList)
-    {
-      <li>@message</li>      
-    }
-  </ol>
+  <table class="table">
+    <tbody>
+      <tr>
+        <td>Auth State</td>
+        <td>
+          @authReply?.UserId | @authReply?.UserName | @authReply?.Roles |
+          @authReply?.IssuedAtUtc?.ToDateTime().ToLocalTime() |
+          @authReply?.NotBeforeUtc?.ToDateTime().ToLocalTime() |
+          @authReply?.ExpiresUtc?.ToDateTime().ToLocalTime()
+        </td>
+      </tr>
+    </tbody>
+  </table>
 }
 
 @code {
@@ -72,9 +64,6 @@
 
   AuthenticationReply? tokenReply = null;
   AuthStateReply? authReply = null;
-  SampleReply? sampleReply = null;
-
-  List<string> messageList = new();
 
   async Task HandleLogin()
   {
@@ -83,7 +72,6 @@
       errMsg = null;
       f_loading = true;
       tokenReply = await accSvc.AuthenticateAsync(new AuthenticationRequest { UserName = "admin", UserPassword = "admin" });
-      authReply = await client.GetAuthStateAsync(tokenReply);
     }
     catch (Exception ex)
     {
@@ -95,31 +83,17 @@
     }
   }
 
-  async Task HandleCallSample()
+  async Task HandleGetAuthState()
   {
     try
     {
-      sampleReply = null;
       errMsg = null;
       f_loading = true;
-
-      (sampleReply, string msg) = await client.Auth_GetFullNameAsync(
-        new SampleRequest { FirstName = $"Smart{DateTime.Now:mm:ss}", LastName = "Hao" }, 
-        tokenReply!);
-
-      // for debug
-      messageList.Add($"Call sample @{DateTime.Now:HH:mm:ss} → {msg}");
-
-      await Task.Delay(800); // UX
-
-      if (msg != "SUCCESS") errMsg = msg;
+      authReply = await accSvc.GetAuthStateAsync();
     }
     catch (Exception ex)
     {
       errMsg = $"出現例外！{ex.Message}";
-
-      // for debug
-      messageList.Add($"Call sample @{DateTime.Now:HH:mm:ss} → {errMsg}");
     }
     finally
     {
