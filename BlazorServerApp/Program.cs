@@ -1,6 +1,7 @@
 using BlazorServerApp.Services;
 using Grpc.Core;
 using GrpcDemoService;
+using System.Reflection.Metadata.Ecma335;
 
 var builder = WebApplication.CreateBuilder(args);
 var _config = builder.Configuration;
@@ -21,15 +22,21 @@ Func<AuthInterceptorContext, Metadata, IServiceProvider, Task> grpcAuthIntercept
 };
 
 //## 註冊：gRPC Client Servic
-builder.Services.AddGrpcClient<Greeter.GreeterClient>(options =>
-{
-  options.Address = new Uri(_config["gRPCHostAddress"]);
-}).AddCallCredentials(grpcAuthInterceptor)
-  .AddInterceptor<GrpcLoggerInterceptor>();
-
 builder.Services.AddGrpcClient<Sample.SampleClient>(options =>
 {
   options.Address = new Uri(_config["gRPCHostAddress"]);
+
+  //## 進階組態：保持運作 Ping - 應用於大量且需即時回應的情境，一般不需要開啟此組態。
+  // ref → [Keep alive pings/保持運作 Ping](https://learn.microsoft.com/zh-tw/aspnet/core/grpc/performance?view=aspnetcore-6.0#keep-alive-pings)
+  options.ChannelOptionsActions.Add(channelOptions =>
+    channelOptions.HttpHandler = new SocketsHttpHandler
+    {
+      PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
+      KeepAlivePingDelay = TimeSpan.FromSeconds(60),
+      KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
+      EnableMultipleHttp2Connections = true
+    });
+
 }).AddCallCredentials(grpcAuthInterceptor)
   .AddInterceptor<GrpcLoggerInterceptor>();
 
