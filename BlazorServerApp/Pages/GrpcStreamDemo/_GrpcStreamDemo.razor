@@ -1,7 +1,7 @@
 ﻿@using Grpc.Net.Client
 @using GrpcDemoService
 @page "/grpcstreamdemo"
-@inject MyBizService bizSvc
+@inject StreamDemo.StreamDemoClient streamClient
 
 <PageTitle>gRPC stream demo</PageTitle>
 
@@ -10,6 +10,20 @@
 <button class="btn btn-primary" disabled=@f_loading @onclick=HandleServerStreamDemo>Server stream</button>
 <button class="btn btn-primary" disabled=@f_loading @onclick=HandleClientStreamDemo>Client stream</button>
 <button class="btn btn-primary" disabled=@f_loading @onclick=HandleBidirectionStreamDemo>Bidirectional stream</button>
+
+@if (errMsg != null)
+{
+  <div class="alert alert-danger my-3" role="alert">
+    @errMsg
+  </div>
+}
+
+@if (f_loading)
+{
+  <div class="progress">
+    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+  </div>
+}
 
 <h6>回應訊息</h6>
 <ol>
@@ -20,10 +34,8 @@
 </ol>
 
 @code {
-  //## Resource
-  string gRPCHostAddress = @"https://localhost:7176"; // http://localhost:5220,
-
   bool f_loading = false;
+  string? errMsg = null;
   List<string> messageList = new();
 
   Task HandleReset()
@@ -36,12 +48,10 @@
   {
     try
     {
+      errMsg = null;
       f_loading = true;
 
-      using var channel = GrpcChannel.ForAddress(gRPCHostAddress);
-      var client = new StreamDemo.StreamDemoClient(channel);
-      var reply = client.ServerStreamDemo(new Test { Message = "測試" });
-
+      var reply = streamClient.ServerStreamDemo(new Test { Message = "測試" });
       while (await reply.ResponseStream.MoveNext(CancellationToken.None))
       {
         var msg = reply.ResponseStream.Current;
@@ -50,6 +60,10 @@
       }
 
       messageList.Add($"Server Streaming Completed.");
+    }
+    catch (Exception ex)
+    {
+      errMsg = $"出現例外！{ex.Message}";
     }
     finally
     {
@@ -61,12 +75,11 @@
   {
     try
     {
+      errMsg = null;
       f_loading = true;
       Random randomDelay = new();
 
-      using var channel = GrpcChannel.ForAddress(gRPCHostAddress);
-      var client = new StreamDemo.StreamDemoClient(channel);
-      var streamCaller = client.ClientStreamDemo();
+      var streamCaller = streamClient.ClientStreamDemo();
 
       for (int i = 1; i <= 10; i++)
       {
@@ -85,6 +98,10 @@
       var reply = await streamCaller.ResponseAsync;
       messageList.Add($"收到回應: {reply.Message}");
     }
+    catch (Exception ex)
+    {
+      errMsg = $"出現例外！{ex.Message}";
+    }
     finally
     {
       f_loading = false;
@@ -95,12 +112,11 @@
   {
     try
     {
+      errMsg = null;
       f_loading = true;
       Random randomDelay = new();
 
-      using var channel = GrpcChannel.ForAddress(gRPCHostAddress);
-      var client = new StreamDemo.StreamDemoClient(channel);
-      var streamCaller = client.BidirectionStreamDemo();
+      var streamCaller = streamClient.BidirectionStreamDemo();
 
       //## 先定義：負責收回回應資料片段工作
       var replyTask = Task.Run(async () =>
@@ -134,6 +150,10 @@
       });
 
       await Task.WhenAll(reqTask, replyTask);
+    }
+    catch (Exception ex)
+    {
+      errMsg = $"出現例外！{ex.Message}";
     }
     finally
     {

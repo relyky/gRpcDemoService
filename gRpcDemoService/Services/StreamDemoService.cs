@@ -1,8 +1,10 @@
 ﻿using Grpc.Core;
 using GrpcDemoService;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GrpcDemoService.Services;
 
+[Authorize]
 public class StreamDemoService(ILogger<StreamDemoService> _logger)
   : StreamDemo.StreamDemoBase
 {

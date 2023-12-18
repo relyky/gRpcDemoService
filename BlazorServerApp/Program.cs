@@ -39,6 +39,12 @@ builder.Services.AddGrpcClient<Product.ProductClient>(options =>
 }).AddCallCredentials(grpcAuthInterceptor)
   .AddInterceptor<GrpcLoggerInterceptor>();
 
+builder.Services.AddGrpcClient<StreamDemo.StreamDemoClient>(options =>
+{
+  options.Address = new Uri(_config["gRPCHostAddress"]);
+}).AddCallCredentials(grpcAuthInterceptor)
+  .AddInterceptor<GrpcLoggerInterceptor>();
+
 //## 註冊：客製服務
 builder.Services.AddSingleton<AccountService>();
 builder.Services.AddScoped<MyBizService>();
